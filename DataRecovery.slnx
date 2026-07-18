@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/DataRecovery.App/DataRecovery.App.csproj" />
+    <Project Path="src/DataRecovery.Core/DataRecovery.Core.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/DataRecovery.Core.Tests/DataRecovery.Core.Tests.csproj" />
+  </Folder>
+</Solution>

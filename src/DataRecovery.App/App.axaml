@@ -1,0 +1,169 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="DataRecovery.App.App"
+             xmlns:local="using:DataRecovery.App"
+             RequestedThemeVariant="Light">
+  <Application.DataTemplates>
+    <local:ViewLocator/>
+  </Application.DataTemplates>
+  <Application.Styles>
+    <FluentTheme>
+      <FluentTheme.Palettes>
+        <ColorPaletteResources x:Key="Light"
+                               Accent="#0F9F93"
+                               RegionColor="#F6F7F9"/>
+        <ColorPaletteResources x:Key="Dark"
+                               Accent="#2DD4BF"
+                               RegionColor="#111827"/>
+      </FluentTheme.Palettes>
+    </FluentTheme>
+    <Style Selector="TextBlock">
+      <Setter Property="Foreground" Value="#25364A"/>
+    </Style>
+    <Style Selector="Window">
+      <Setter Property="FontFamily" Value="Inter, Microsoft YaHei UI, sans-serif"/>
+      <Setter Property="Background" Value="#F6F7F9"/>
+    </Style>
+    <Style Selector="Button.primary">
+      <Setter Property="Background" Value="#0F9F93"/>
+      <Setter Property="Foreground" Value="White"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="CornerRadius" Value="9"/>
+      <Setter Property="Padding" Value="25,12"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+    </Style>
+    <Style Selector="Button.primary:pointerover">
+      <Setter Property="Background" Value="#0B8A80"/>
+      <Setter Property="Foreground" Value="White"/>
+    </Style>
+    <Style Selector="Button.primary:pressed">
+      <Setter Property="Background" Value="#08756D"/>
+      <Setter Property="Foreground" Value="White"/>
+    </Style>
+    <Style Selector="Button.primary:disabled">
+      <Setter Property="Background" Value="#C8D2DE"/>
+      <Setter Property="Foreground" Value="#F8FAFC"/>
+    </Style>
+    <Style Selector="Button.secondary">
+      <Setter Property="Background" Value="White"/>
+      <Setter Property="Foreground" Value="#26364A"/>
+      <Setter Property="BorderBrush" Value="#D7E0EB"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="CornerRadius" Value="9"/>
+      <Setter Property="Padding" Value="18,11"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+    </Style>
+    <Style Selector="Button.secondary:pointerover">
+      <Setter Property="Background" Value="#F2F7FD"/>
+      <Setter Property="BorderBrush" Value="#8FD1C9"/>
+      <Setter Property="Foreground" Value="#1E4250"/>
+    </Style>
+    <Style Selector="Button.secondary:pressed">
+      <Setter Property="Background" Value="#DDF8F3"/>
+      <Setter Property="Foreground" Value="#153C42"/>
+    </Style>
+    <Style Selector="Button.topbarButton">
+      <Setter Property="Background" Value="#173D3A"/>
+      <Setter Property="Foreground" Value="#D8FAF5"/>
+      <Setter Property="BorderBrush" Value="#2C625D"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="CornerRadius" Value="9"/>
+      <Setter Property="Padding" Value="15,8"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+    </Style>
+    <Style Selector="Button.topbarButton:pointerover">
+      <Setter Property="Background" Value="#20534E"/>
+      <Setter Property="Foreground" Value="White"/>
+      <Setter Property="BorderBrush" Value="#3A7B74"/>
+    </Style>
+    <Style Selector="Button.topbarButton:pressed">
+      <Setter Property="Background" Value="#0F2F2C"/>
+      <Setter Property="Foreground" Value="#CCFBF1"/>
+      <Setter Property="BorderBrush" Value="#2A6861"/>
+    </Style>
+    <Style Selector="Button.topbarButton:disabled">
+      <Setter Property="Background" Value="#1C3434"/>
+      <Setter Property="Foreground" Value="#789693"/>
+      <Setter Property="BorderBrush" Value="#294541"/>
+      <Setter Property="Opacity" Value="0.55"/>
+    </Style>
+    <Style Selector="Border.card">
+      <Setter Property="Background" Value="White"/>
+      <Setter Property="BorderBrush" Value="#E0E7F0"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="CornerRadius" Value="13"/>
+      <Setter Property="BoxShadow" Value="0 4 18 0 #120E2740"/>
+    </Style>
+    <Style Selector="Border.deviceRow">
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="CornerRadius" Value="9"/>
+    </Style>
+    <Style Selector="Border.deviceRow:pointerover">
+      <Setter Property="Background" Value="#ECFDF9"/>
+    </Style>
+    <Style Selector="TextBlock.heading">
+      <Setter Property="Foreground" Value="#142238"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+      <Setter Property="FontSize" Value="25"/>
+    </Style>
+    <Style Selector="TextBlock.muted">
+      <Setter Property="Foreground" Value="#758398"/>
+    </Style>
+    <Style Selector="TextBox">
+      <Setter Property="CornerRadius" Value="8"/>
+      <Setter Property="BorderBrush" Value="#CFD9E5"/>
+      <Setter Property="Background" Value="White"/>
+      <Setter Property="Foreground" Value="#172338"/>
+    </Style>
+    <Style Selector="TextBox:focus">
+      <Setter Property="BorderBrush" Value="#14B8A6"/>
+    </Style>
+    <Style Selector="ProgressBar">
+      <Setter Property="Foreground" Value="#14A89B"/>
+      <Setter Property="Background" Value="#E4EBF3"/>
+      <Setter Property="CornerRadius" Value="4"/>
+    </Style>
+    <Style Selector="ListBoxItem">
+      <Setter Property="CornerRadius" Value="8"/>
+      <Setter Property="Margin" Value="4,2"/>
+      <Setter Property="Foreground" Value="#25364A"/>
+    </Style>
+    <Style Selector="ListBoxItem:pointerover">
+      <Setter Property="Background" Value="#F0FDFA"/>
+      <Setter Property="Foreground" Value="#172338"/>
+    </Style>
+    <Style Selector="ListBoxItem:selected">
+      <Setter Property="Background" Value="#DDF8F3"/>
+      <Setter Property="Foreground" Value="#0F514B"/>
+    </Style>
+    <Style Selector="CheckBox">
+      <Setter Property="Foreground" Value="#25364A"/>
+      <Setter Property="Background" Value="White"/>
+      <Setter Property="BorderBrush" Value="#9BAABD"/>
+    </Style>
+    <Style Selector="CheckBox:pointerover">
+      <Setter Property="Foreground" Value="#172338"/>
+      <Setter Property="Background" Value="#E8FAF6"/>
+      <Setter Property="BorderBrush" Value="#0F9F93"/>
+    </Style>
+    <Style Selector="CheckBox:checked">
+      <Setter Property="Foreground" Value="White"/>
+      <Setter Property="Background" Value="#0F9F93"/>
+      <Setter Property="BorderBrush" Value="#0F9F93"/>
+    </Style>
+    <Style Selector="RadioButton">
+      <Setter Property="Foreground" Value="#25364A"/>
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="BorderBrush" Value="#9BAABD"/>
+    </Style>
+    <Style Selector="RadioButton:pointerover">
+      <Setter Property="Foreground" Value="#172338"/>
+      <Setter Property="Background" Value="#F0FDFA"/>
+      <Setter Property="BorderBrush" Value="#0F9F93"/>
+    </Style>
+    <Style Selector="RadioButton:checked">
+      <Setter Property="Foreground" Value="#0F514B"/>
+      <Setter Property="BorderBrush" Value="#0F9F93"/>
+    </Style>
+  </Application.Styles>
+</Application>

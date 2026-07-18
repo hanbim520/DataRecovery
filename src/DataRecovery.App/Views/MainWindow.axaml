@@ -1,0 +1,307 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:DataRecovery.App.ViewModels"
+        xmlns:core="using:DataRecovery.Core.Models"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="800"
+        x:Class="DataRecovery.App.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/datarecovery-logo.ico"
+        Title="DataRecovery 数据恢复"
+        Width="1200" Height="640" MinWidth="980" MinHeight="600"
+        WindowStartupLocation="CenterScreen">
+
+  <Grid RowDefinitions="72,*,40">
+    <!-- 顶栏 -->
+    <Border Grid.Row="0" Padding="30,0">
+      <Border.Background>
+        <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
+          <GradientStop Color="#0B1220" Offset="0"/>
+          <GradientStop Color="#123B38" Offset="1"/>
+        </LinearGradientBrush>
+      </Border.Background>
+      <Grid ColumnDefinitions="Auto,*,Auto" VerticalAlignment="Center">
+        <StackPanel Orientation="Horizontal" Spacing="13" VerticalAlignment="Center">
+          <Border Width="44" Height="44" CornerRadius="12" BoxShadow="0 4 12 0 #4A061B34">
+            <Image Source="/Assets/datarecovery-logo.png" Stretch="Uniform"/>
+          </Border>
+          <StackPanel Spacing="0">
+            <TextBlock Text="DataRecovery" Foreground="White" FontSize="20" FontWeight="SemiBold"/>
+            <TextBlock Text="专业、安全、只读的数据恢复工具" Foreground="#9FC8C3" FontSize="11"/>
+          </StackPanel>
+        </StackPanel>
+        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="10">
+          <Button Classes="topbarButton"
+                  IsEnabled="{Binding CanConfigureScan}"
+                  >
+            <Button.Flyout>
+              <Flyout>
+                <Border Width="360" Padding="18" Background="White"
+                        x:DataType="vm:MainWindowViewModel">
+                  <StackPanel Spacing="12">
+                    <StackPanel Spacing="3">
+                      <TextBlock Text="扫描类型" FontSize="16" FontWeight="SemiBold" Foreground="#172338"/>
+                      <TextBlock Text="选择本次要查找的数据范围" Foreground="#758398" FontSize="12"/>
+                    </StackPanel>
+                    <Border Height="1" Background="#E5EBF2"/>
+                    <RadioButton GroupName="ScanMode" IsChecked="{Binding IsDeletedScanMode, Mode=TwoWay}">
+                      <StackPanel Margin="6,0,0,0" Spacing="2">
+                        <TextBlock Text="已删除文件（默认）" FontWeight="SemiBold" Foreground="#26364A"/>
+                        <TextBlock Text="读取删除目录项，尽量保留原名称和大小" Foreground="#758398" FontSize="11"/>
+                      </StackPanel>
+                    </RadioButton>
+                    <RadioButton GroupName="ScanMode" IsChecked="{Binding IsLostScanMode, Mode=TwoWay}">
+                      <StackPanel Margin="6,0,0,0" Spacing="2">
+                        <TextBlock Text="丢失文件" FontWeight="SemiBold" Foreground="#26364A"/>
+                        <TextBlock Text="按文件特征查找原路径未知的候选数据" Foreground="#758398" FontSize="11"/>
+                      </StackPanel>
+                    </RadioButton>
+                    <RadioButton GroupName="ScanMode" IsChecked="{Binding IsAllScanMode, Mode=TwoWay}">
+                      <StackPanel Margin="6,0,0,0" Spacing="2">
+                        <TextBlock Text="全部类型" FontWeight="SemiBold" Foreground="#26364A"/>
+                        <TextBlock Text="组合删除目录项和文件特征扫描" Foreground="#758398" FontSize="11"/>
+                      </StackPanel>
+                    </RadioButton>
+                  </StackPanel>
+                </Border>
+              </Flyout>
+            </Button.Flyout>
+            <StackPanel Orientation="Horizontal" Spacing="7">
+              <TextBlock Text="⚙" Foreground="#D8FAF5" FontSize="14"/>
+              <TextBlock Text="设置" Foreground="#D8FAF5" FontWeight="SemiBold"/>
+            </StackPanel>
+          </Button>
+          <Border Background="#153936" BorderBrush="#2A5D58" BorderThickness="1" CornerRadius="16" Padding="13,6">
+            <TextBlock Text="●  只读扫描 · 安全恢复" Foreground="#99F6E4" FontSize="12"/>
+          </Border>
+        </StackPanel>
+      </Grid>
+    </Border>
+
+    <Grid Grid.Row="1" ColumnDefinitions="240,*">
+      <!-- 左侧步骤 -->
+      <Border Background="#111827" BorderBrush="#263244" BorderThickness="0,0,1,0" Padding="24,30">
+        <Grid RowDefinitions="Auto,Auto,Auto,*,Auto">
+          <TextBlock Text="恢复流程" FontWeight="SemiBold" Foreground="#94A3B8" FontSize="13" Margin="4,0,0,22"/>
+          <StackPanel Grid.Row="1" Spacing="0">
+            <Grid ColumnDefinitions="38,*" Height="58">
+              <Border Width="30" Height="30" CornerRadius="15" Background="#14B8A6" VerticalAlignment="Top" BoxShadow="0 3 10 0 #4514B8A6">
+                <TextBlock Text="1" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="SemiBold"/>
+              </Border>
+              <StackPanel Grid.Column="1" Spacing="2" Margin="0,3,0,0">
+                <TextBlock Text="选择位置" Foreground="White" FontWeight="SemiBold"/>
+                <TextBlock Text="磁盘或镜像" Foreground="#718096" FontSize="11"/>
+              </StackPanel>
+            </Grid>
+            <Grid ColumnDefinitions="38,*" Height="58">
+              <Border Width="30" Height="30" CornerRadius="15" Background="#1F2937" BorderBrush="#344153" BorderThickness="1" VerticalAlignment="Top">
+                <TextBlock Text="2" Foreground="#8B9AAF" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="SemiBold"/>
+              </Border>
+              <StackPanel Grid.Column="1" Spacing="2" Margin="0,3,0,0">
+                <TextBlock Text="扫描数据" Foreground="#D5DCE6" FontWeight="SemiBold"/>
+                <TextBlock Text="识别与查找" Foreground="#718096" FontSize="11"/>
+              </StackPanel>
+            </Grid>
+            <Grid ColumnDefinitions="38,*" Height="58">
+              <Border Width="30" Height="30" CornerRadius="15" Background="#1F2937" BorderBrush="#344153" BorderThickness="1" VerticalAlignment="Top">
+                <TextBlock Text="3" Foreground="#8B9AAF" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="SemiBold"/>
+              </Border>
+              <StackPanel Grid.Column="1" Spacing="2" Margin="0,3,0,0">
+                <TextBlock Text="预览并恢复" Foreground="#D5DCE6" FontWeight="SemiBold"/>
+                <TextBlock Text="保存到安全位置" Foreground="#718096" FontSize="11"/>
+              </StackPanel>
+            </Grid>
+          </StackPanel>
+
+          <Border Grid.Row="4" Background="#1C2736" BorderBrush="#36465A" BorderThickness="1" CornerRadius="10" Padding="14">
+            <StackPanel Spacing="6">
+              <TextBlock Text="⚠  安全提示" Foreground="#FBBF24" FontWeight="SemiBold" FontSize="12"/>
+              <TextBlock Text="请勿将恢复文件保存回源磁盘，以免覆盖尚未恢复的数据。" TextWrapping="Wrap" Foreground="#AAB6C5" FontSize="11" LineHeight="17"/>
+            </StackPanel>
+          </Border>
+        </Grid>
+      </Border>
+
+      <!-- 页面内容 -->
+      <Grid Grid.Column="1" Margin="38,30,38,26">
+        <!-- 选择数据源 -->
+        <Grid IsVisible="{Binding ShowSourcePage}" RowDefinitions="Auto,Auto,*,Auto">
+          <Grid ColumnDefinitions="*,Auto">
+            <StackPanel Spacing="6">
+              <TextBlock Text="选择要恢复的位置" Classes="heading"/>
+              <TextBlock Text="支持 U 盘、移动硬盘、SSD、机械硬盘和原始磁盘镜像" Classes="muted"/>
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
+              <Button Classes="secondary" Content="↻  刷新" Command="{Binding RefreshSourcesCommand}"/>
+              <Button Classes="secondary" Content="＋  打开镜像" Command="{Binding ChooseImageCommand}"/>
+            </StackPanel>
+          </Grid>
+
+          <Border Grid.Row="1" Classes="card" Margin="0,24,0,16" Padding="18,14" Background="#F0FDFA" BorderBrush="#C7EEE7">
+            <Grid ColumnDefinitions="Auto,*,Auto" VerticalAlignment="Center">
+              <Border Width="28" Height="28" Background="#CCFBF1" CornerRadius="14" Margin="0,0,11,0">
+                <TextBlock Text="✓" Foreground="#0F8A7E" FontSize="15" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+              </Border>
+              <TextBlock Grid.Column="1" Text="扫描过程不会写入源设备，物理磁盘通常需要管理员/root 权限。" Foreground="#52667E"/>
+              <TextBlock Grid.Column="2" Text="FAT12/16/32  ·  exFAT  ·  NTFS  ·  Ext2/3" Foreground="#0F8A7E" FontWeight="SemiBold" FontSize="12"/>
+            </Grid>
+          </Border>
+
+          <Border Grid.Row="2" Classes="card" Padding="0" ClipToBounds="True">
+            <Grid RowDefinitions="50,*">
+              <Grid Background="#F7F9FC" ColumnDefinitions="48,*,130,130,120" Margin="16,0">
+                <CheckBox IsChecked="{Binding AreAllSourcesSelected, Mode=TwoWay}"
+                          HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <TextBlock Grid.Column="1" Text="设备 / 卷" VerticalAlignment="Center" Classes="muted" FontWeight="SemiBold"/>
+                <TextBlock Grid.Column="2" Text="类型" VerticalAlignment="Center" Classes="muted" FontWeight="SemiBold"/>
+                <TextBlock Grid.Column="3" Text="文件系统" VerticalAlignment="Center" Classes="muted" FontWeight="SemiBold"/>
+                <TextBlock Grid.Column="4" Text="容量" VerticalAlignment="Center" Classes="muted" FontWeight="SemiBold"/>
+              </Grid>
+              <ScrollViewer Grid.Row="1">
+                <ItemsControl ItemsSource="{Binding Sources}">
+                  <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="vm:StorageSourceItemViewModel">
+                    <Border Classes="deviceRow" Margin="8,3" Padding="4,0">
+                    <Grid ColumnDefinitions="48,*,130,130,120" MinHeight="60" VerticalAlignment="Center">
+                      <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                      <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding DisplayName}" Foreground="#23344A" FontWeight="SemiBold"/>
+                      </StackPanel>
+                      <TextBlock Grid.Column="2" Text="{Binding KindText}" VerticalAlignment="Center" Foreground="#52667E"/>
+                      <TextBlock Grid.Column="3" Text="{Binding FileSystem}" VerticalAlignment="Center" Foreground="#52667E"/>
+                      <TextBlock Grid.Column="4" Text="{Binding CapacityText}" VerticalAlignment="Center" Foreground="#52667E"/>
+                    </Grid>
+                    </Border>
+                  </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </ScrollViewer>
+            </Grid>
+          </Border>
+
+          <Grid Grid.Row="3" ColumnDefinitions="*,Auto" Margin="0,20,0,0">
+            <StackPanel Spacing="3" VerticalAlignment="Center">
+              <StackPanel Orientation="Horizontal" Spacing="7">
+                <Border Background="#DDF8F3" CornerRadius="12" Padding="10,4">
+                  <TextBlock Text="{Binding ScanModeTitle}" Foreground="#0D8378" FontWeight="SemiBold" FontSize="12"/>
+                </Border>
+                <TextBlock Text=" · " Foreground="#B0BAC7"/>
+                <TextBlock Text="{Binding SelectionSummary}" Foreground="#455D77" FontWeight="SemiBold" VerticalAlignment="Center"/>
+              </StackPanel>
+              <TextBlock Text="{Binding ScanModeDescription}" Foreground="#8492A5" FontSize="11"/>
+            </StackPanel>
+            <Button Grid.Column="1" Classes="primary" Content="开始扫描  →" Command="{Binding StartScanCommand}" IsEnabled="{Binding CanStartScan}"/>
+          </Grid>
+        </Grid>
+
+        <!-- 扫描结果 -->
+        <Grid IsVisible="{Binding ShowResultsPage}" RowDefinitions="Auto,Auto,*,Auto">
+          <Grid ColumnDefinitions="Auto,*,Auto" VerticalAlignment="Center">
+            <Button Classes="secondary" Content="←  返回" Command="{Binding BackToSourcesCommand}" Margin="0,0,18,0"/>
+            <StackPanel Grid.Column="1" Spacing="3">
+              <TextBlock Text="扫描与恢复" Classes="heading"/>
+              <TextBlock Text="{Binding ScanDetails}" Classes="muted"/>
+            </StackPanel>
+            <Border Grid.Column="2" Background="#E8FAF6" BorderBrush="#CDEDE7" BorderThickness="1" CornerRadius="10" Padding="15,9">
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <TextBlock Text="检测到" Foreground="#6C7B90"/>
+                <TextBlock Text="{Binding DetectedFileSystem}" Foreground="#0F8A7E" FontWeight="SemiBold"/>
+              </StackPanel>
+            </Border>
+          </Grid>
+
+          <Border Grid.Row="1" Classes="card" Margin="0,20,0,16" Padding="20,16">
+            <Grid RowDefinitions="Auto,8,Auto" ColumnDefinitions="*,Auto">
+              <TextBlock Text="{Binding StatusText}" Foreground="#344A64"/>
+              <TextBlock Grid.Column="1" Text="{Binding ProgressText}" Foreground="#0F8A7E" FontWeight="SemiBold"/>
+              <ProgressBar Grid.Row="2" Grid.ColumnSpan="2" Value="{Binding ScanProgress}" Maximum="100" Height="8"/>
+            </Grid>
+          </Border>
+
+          <Grid Grid.Row="2" ColumnDefinitions="200,*" ColumnSpacing="16">
+            <Border Classes="card" Padding="14" ClipToBounds="True">
+              <Grid RowDefinitions="Auto,*">
+                <TextBlock Text="文件类型" FontWeight="SemiBold" Foreground="#26364A" Margin="6,4,0,8"/>
+                <ListBox Grid.Row="1"
+                         ItemsSource="{Binding Categories}"
+                         SelectedItem="{Binding SelectedCategory}"
+                         Background="Transparent"
+                         BorderThickness="0">
+                  <ListBox.Styles>
+                    <Style Selector="ListBoxItem">
+                      <Setter Property="MinHeight" Value="30"/>
+                      <Setter Property="Margin" Value="4,1"/>
+                      <Setter Property="Padding" Value="10,5"/>
+                    </Style>
+                  </ListBox.Styles>
+                </ListBox>
+              </Grid>
+            </Border>
+
+            <Border Grid.Column="1" Classes="card" ClipToBounds="True">
+              <Grid RowDefinitions="54,*">
+                <Grid ColumnDefinitions="*,260" Margin="14,9" Background="#F8FAFD">
+                  <TextBox PlaceholderText="搜索文件名、源设备或原始路径" Text="{Binding SearchText}" Height="36" Padding="11,6"/>
+                  <TextBlock Grid.Column="1" Text="{Binding ResultCountText}" VerticalAlignment="Center" HorizontalAlignment="Right" Classes="muted" Margin="0,0,8,0"/>
+                </Grid>
+                <ListBox Grid.Row="1" ItemsSource="{Binding FilteredFiles}" SelectedItem="{Binding SelectedFile}" Background="Transparent" BorderThickness="0">
+                  <ListBox.ItemTemplate>
+                    <DataTemplate x:DataType="core:RecoveredFile">
+                      <Grid ColumnDefinitions="34,*,100,90,90" MinHeight="58" Margin="10,2">
+                        <CheckBox IsChecked="{Binding IsSelected}" VerticalAlignment="Center"/>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                          <TextBlock Text="{Binding Name}" Foreground="#23344A" FontWeight="SemiBold"/>
+                          <TextBlock Text="{Binding LocationText}" Classes="muted" FontSize="11"/>
+                        </StackPanel>
+                        <TextBlock Grid.Column="2" Text="{Binding Category}" VerticalAlignment="Center" Foreground="#52667E"/>
+                        <TextBlock Grid.Column="3" Text="{Binding SizeText}" VerticalAlignment="Center" Foreground="#52667E"/>
+                        <Border Grid.Column="4" Background="#E8F7EF" BorderBrush="#D4EEE0" BorderThickness="1" CornerRadius="11" Padding="9,3" HorizontalAlignment="Left" VerticalAlignment="Center">
+                          <TextBlock Text="{Binding StateText}" Foreground="#31865A" FontSize="11"/>
+                        </Border>
+                      </Grid>
+                    </DataTemplate>
+                  </ListBox.ItemTemplate>
+                </ListBox>
+              </Grid>
+            </Border>
+          </Grid>
+
+          <Grid Grid.Row="3" ColumnDefinitions="*,Auto" Margin="0,16,0,0">
+            <StackPanel Orientation="Horizontal" Spacing="16" VerticalAlignment="Center">
+              <TextBlock Text="目标位置必须与源设备不同" Foreground="#B07810"/>
+              <TextBlock Text="● 良好" Foreground="#3A9B66" FontSize="11" VerticalAlignment="Center"/>
+              <TextBlock Text="● 部分" Foreground="#D58B20" FontSize="11" VerticalAlignment="Center"/>
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
+              <Button Classes="secondary" Content="取消扫描" Command="{Binding CancelScanCommand}" IsVisible="{Binding IsBusy}"/>
+              <Button Classes="primary" Content="恢复所选文件  →" Command="{Binding RecoverSelectedCommand}" IsEnabled="{Binding CanRecover}"/>
+            </StackPanel>
+          </Grid>
+        </Grid>
+
+        <!-- 恢复完成 -->
+        <Grid IsVisible="{Binding ShowRecoveryPage}">
+          <Border Classes="card" Width="560" Padding="48" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <StackPanel HorizontalAlignment="Center" Spacing="16">
+              <Border Width="68" Height="68" CornerRadius="34" Background="#E9F7EF">
+                <TextBlock Text="✓" Foreground="#2D9A62" FontSize="38" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+              </Border>
+              <TextBlock Text="恢复任务已完成" FontSize="24" FontWeight="SemiBold" Foreground="#172338" HorizontalAlignment="Center"/>
+              <TextBlock Text="{Binding RecoverySummary}" TextWrapping="Wrap" TextAlignment="Center" Foreground="#65758A" MaxWidth="440"/>
+              <Button Classes="primary" Content="返回扫描结果" Command="{Binding ReturnToResultsCommand}" HorizontalAlignment="Center" Margin="0,8,0,0"/>
+            </StackPanel>
+          </Border>
+        </Grid>
+      </Grid>
+    </Grid>
+
+    <Border Grid.Row="2" Background="#EFF3F8" BorderBrush="#DCE4EE" BorderThickness="0,1,0,0" Padding="26,0">
+      <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center">
+        <TextBlock Text="{Binding StatusText}" Foreground="#607188" FontSize="12"/>
+        <TextBlock Grid.Column="1" Text="DataRecovery 1.0 · 跨平台只读恢复引擎" Foreground="#8896A8" FontSize="11"/>
+      </Grid>
+    </Border>
+  </Grid>
+</Window>
