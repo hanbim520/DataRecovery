@@ -77,9 +77,9 @@ public partial class MainWindowViewModel : ViewModelBase
     };
     public string ScanModeDescription => SelectedScanMode switch
     {
-        ScanMode.DeletedFiles => "读取文件系统删除目录项，优先保留原文件名、大小和目录信息",
+        ScanMode.DeletedFiles => "读取文件系统删除元数据，优先保留可用的原文件名、大小和路径信息",
         ScanMode.LostFiles => "按文件特征扫描原始扇区，候选文件的原名称和路径通常未知",
-        _ => "先读取删除目录项，再执行原始扇区文件特征扫描"
+        _ => "先读取删除元数据，再执行原始扇区文件特征扫描"
     };
     public bool IsDeletedScanMode
     {

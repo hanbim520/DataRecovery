@@ -47,6 +47,7 @@ public sealed record RecoveredFile(
     public bool IsSelected { get; set; }
     public string SourcePath { get; init; } = "";
     public string SourceDisplayName { get; init; } = "";
+    public IReadOnlyList<RecoveryExtent> RecoveryExtents { get; init; } = Array.Empty<RecoveryExtent>();
     public string SizeText => SizeFormatter.Format(Size);
     public string LocationText => string.IsNullOrWhiteSpace(SourceDisplayName)
         ? OriginalPath
@@ -59,6 +60,12 @@ public sealed record RecoveredFile(
         _ => "未知"
     };
 }
+
+/// <summary>
+/// 描述恢复文件在源设备上的一个逻辑数据区段。区段按集合顺序拼接；
+/// 稀疏区段不读取源设备，而是在目标文件中生成相同长度的零数据。
+/// </summary>
+public sealed record RecoveryExtent(long SourceOffset, long Length, bool IsSparse = false);
 
 public sealed record ScanProgress(
     double Percent,

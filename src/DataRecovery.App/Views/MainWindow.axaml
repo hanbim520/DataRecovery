@@ -48,7 +48,7 @@
                     <RadioButton GroupName="ScanMode" IsChecked="{Binding IsDeletedScanMode, Mode=TwoWay}">
                       <StackPanel Margin="6,0,0,0" Spacing="2">
                         <TextBlock Text="已删除文件（默认）" FontWeight="SemiBold" Foreground="#26364A"/>
-                        <TextBlock Text="读取删除目录项，尽量保留原名称和大小" Foreground="#758398" FontSize="11"/>
+                        <TextBlock Text="读取删除元数据，尽量保留原名称和大小" Foreground="#758398" FontSize="11"/>
                       </StackPanel>
                     </RadioButton>
                     <RadioButton GroupName="ScanMode" IsChecked="{Binding IsLostScanMode, Mode=TwoWay}">
@@ -60,7 +60,7 @@
                     <RadioButton GroupName="ScanMode" IsChecked="{Binding IsAllScanMode, Mode=TwoWay}">
                       <StackPanel Margin="6,0,0,0" Spacing="2">
                         <TextBlock Text="全部类型" FontWeight="SemiBold" Foreground="#26364A"/>
-                        <TextBlock Text="组合删除目录项和文件特征扫描" Foreground="#758398" FontSize="11"/>
+                        <TextBlock Text="组合删除元数据和文件特征扫描" Foreground="#758398" FontSize="11"/>
                       </StackPanel>
                     </RadioButton>
                   </StackPanel>

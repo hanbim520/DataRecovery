@@ -101,7 +101,10 @@ public sealed class ExFatDeletedFileScanner
                 GetCategory(name),
                 RecoveryState.Excellent,
                 dataOffset,
-                "exFAT 删除目录项"));
+                "exFAT 删除目录项")
+            {
+                RecoveryExtents = [new RecoveryExtent(dataOffset, size)]
+            });
 
             offset = entrySetEnd - 32;
         }

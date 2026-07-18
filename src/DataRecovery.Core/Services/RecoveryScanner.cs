@@ -39,9 +39,18 @@ public sealed class RecoveryScanner(IFileSystemDetector detector) : IRecoverySca
     {
         await using var stream = OpenReadOnly(path);
         var fileSystem = await detector.DetectAsync(stream, cancellationToken);
-        var metadataFiles = fileSystem.Kind == FileSystemKind.ExFat
-            ? await new ExFatDeletedFileScanner().ScanAsync(stream, cancellationToken)
-            : Array.Empty<RecoveredFile>();
+        var metadataFiles = fileSystem.Kind switch
+        {
+            FileSystemKind.Fat12 or FileSystemKind.Fat16 or FileSystemKind.Fat32 =>
+                await new FatDeletedFileScanner().ScanAsync(stream, cancellationToken),
+            FileSystemKind.ExFat =>
+                await new ExFatDeletedFileScanner().ScanAsync(stream, cancellationToken),
+            FileSystemKind.Ntfs =>
+                await new NtfsDeletedFileScanner().ScanAsync(stream, cancellationToken),
+            FileSystemKind.Ext2 or FileSystemKind.Ext3 =>
+                await new ExtDeletedFileScanner().ScanAsync(stream, cancellationToken),
+            _ => Array.Empty<RecoveredFile>()
+        };
         if (stream.CanSeek) stream.Position = 0;
 
         var includeDeletedFiles = scanMode is ScanMode.DeletedFiles or ScanMode.AllFiles;
@@ -54,7 +63,7 @@ public sealed class RecoveryScanner(IFileSystemDetector detector) : IRecoverySca
         {
             progress?.Report(new ScanProgress(
                 100,
-                $"{fileSystem.Label} 删除目录项扫描完成",
+                $"{fileSystem.Label} 删除元数据扫描完成",
                 4096,
                 selectedMetadataFiles.Count,
                 selectedMetadataFiles));
@@ -71,7 +80,7 @@ public sealed class RecoveryScanner(IFileSystemDetector detector) : IRecoverySca
             pendingDiscoveries?.Enqueue(file);
         }
         var knownFileRanges = metadataFiles
-            .Select(file => new KnownFileRange(file.Offset, file.Size))
+            .SelectMany(GetKnownFileRanges)
             .ToArray();
         // 工作线程可以等于全部 CPU 数量，但队列无需同比扩张，避免大盘扫描占用过多内存。
         var queueCapacity = Math.Clamp(workerCount, 2, 16);
@@ -138,7 +147,7 @@ public sealed class RecoveryScanner(IFileSystemDetector detector) : IRecoverySca
             .OrderBy(file => file.Offset)
             .Select((file, index) => file with
             {
-                Name = file.Signature == "exFAT 删除目录项"
+                Name = IsMetadataResult(file)
                     ? file.Name
                     : $"恢复文件_{index + 1:0000}{Path.GetExtension(file.Name)}"
             })
@@ -159,19 +168,42 @@ public sealed class RecoveryScanner(IFileSystemDetector detector) : IRecoverySca
         Directory.CreateDirectory(destination);
         var target = GetUniquePath(Path.Combine(destination, file.Name));
         await using var source = OpenReadOnly(sourcePath);
-        source.Position = file.Offset;
         await using var output = new FileStream(target, FileMode.CreateNew, FileAccess.Write,
             FileShare.None, RecoveryBufferSize, true);
         var remaining = file.Size;
         var buffer = new byte[RecoveryBufferSize];
-        while (remaining > 0)
+        var extents = file.RecoveryExtents.Count > 0
+            ? file.RecoveryExtents
+            : [new RecoveryExtent(file.Offset, file.Size)];
+        foreach (var extent in extents)
         {
-            var read = await source.ReadAsync(
-                buffer.AsMemory(0, (int)Math.Min(buffer.Length, remaining)), cancellationToken);
-            if (read == 0) break;
-            await output.WriteAsync(buffer.AsMemory(0, read), cancellationToken);
-            remaining -= read;
+            if (remaining <= 0) break;
+            var extentRemaining = Math.Min(remaining, Math.Max(0, extent.Length));
+            if (extentRemaining == 0) continue;
+            if (extent.IsSparse)
+            {
+                output.Position += extentRemaining;
+                remaining -= extentRemaining;
+                continue;
+            }
+            if (extent.SourceOffset < 0)
+                throw new InvalidDataException("恢复区段包含无效的源偏移。");
+
+            source.Position = extent.SourceOffset;
+            while (extentRemaining > 0)
+            {
+                var read = await source.ReadAsync(
+                    buffer.AsMemory(0, (int)Math.Min(buffer.Length, extentRemaining)), cancellationToken);
+                if (read == 0) break;
+                await output.WriteAsync(buffer.AsMemory(0, read), cancellationToken);
+                extentRemaining -= read;
+                remaining -= read;
+            }
+            if (extentRemaining > 0) break;
         }
+        // 当最后一个区段为稀疏区段时，移动文件位置本身不会扩展文件。
+        if (remaining == 0 && output.Length < file.Size)
+            output.SetLength(file.Size);
     }
 
     private static async Task ProduceChunksAsync(
@@ -348,6 +380,27 @@ public sealed class RecoveryScanner(IFileSystemDetector detector) : IRecoverySca
             if (!File.Exists(candidate)) return candidate;
         }
     }
+
+    private static IEnumerable<KnownFileRange> GetKnownFileRanges(RecoveredFile file)
+    {
+        if (file.RecoveryExtents.Count == 0)
+        {
+            if (file.Size > 0) yield return new KnownFileRange(file.Offset, file.Size);
+            yield break;
+        }
+
+        foreach (var extent in file.RecoveryExtents)
+        {
+            if (!extent.IsSparse && extent.SourceOffset >= 0 && extent.Length > 0)
+                yield return new KnownFileRange(extent.SourceOffset, extent.Length);
+        }
+    }
+
+    private static bool IsMetadataResult(RecoveredFile file) =>
+        file.RecoveryExtents.Count > 0 ||
+        file.Signature.Contains("删除", StringComparison.OrdinalIgnoreCase) ||
+        file.Signature.Contains("$MFT", StringComparison.OrdinalIgnoreCase) ||
+        file.Signature.Contains("inode", StringComparison.OrdinalIgnoreCase);
 
     private sealed record ScanChunk(byte[] Buffer, int Count, long AbsoluteOffset, int SourceBytes);
     private sealed record KnownFileRange(long Offset, long Length)

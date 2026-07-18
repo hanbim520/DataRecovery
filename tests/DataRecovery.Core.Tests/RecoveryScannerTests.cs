@@ -77,6 +77,44 @@ public sealed class RecoveryScannerTests
         }
     }
 
+    [Fact]
+    public async Task RecoversFragmentedAndSparseExtentsInLogicalOrder()
+    {
+        var root = Path.Combine(Path.GetTempPath(), $"datarecovery-extents-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(root);
+        try
+        {
+            var image = Path.Combine(root, "fragmented.img");
+            var bytes = new byte[4096];
+            Encoding.ASCII.GetBytes("ABCD").CopyTo(bytes, 128);
+            Encoding.ASCII.GetBytes("WXYZ").CopyTo(bytes, 2048);
+            await File.WriteAllBytesAsync(image, bytes);
+            var file = new RecoveredFile(
+                "fragmented.bin", "已删除文件/测试", 12, "其他",
+                RecoveryState.Good, 128, "测试区段")
+            {
+                RecoveryExtents =
+                [
+                    new RecoveryExtent(128, 4),
+                    new RecoveryExtent(0, 4, IsSparse: true),
+                    new RecoveryExtent(2048, 4)
+                ]
+            };
+
+            var output = Path.Combine(root, "output");
+            await RecoveryScanner.RecoverAsync(image, file, output);
+
+            var recovered = await File.ReadAllBytesAsync(Path.Combine(output, "fragmented.bin"));
+            byte[] expected =
+                [.. Encoding.ASCII.GetBytes("ABCD"), 0, 0, 0, 0, .. Encoding.ASCII.GetBytes("WXYZ")];
+            Assert.Equal(expected, recovered);
+        }
+        finally
+        {
+            Directory.Delete(root, true);
+        }
+    }
+
     private sealed class InlineProgress<T>(Action<T> callback) : IProgress<T>
     {
         public void Report(T value) => callback(value);
