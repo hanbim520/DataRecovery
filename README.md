@@ -1,6 +1,6 @@
+<img width="1202" height="672" alt="image" src="https://github.com/user-attachments/assets/dc64064e-40eb-488a-bcc8-663a99f29044" />
 <p align="center">
   <img src="src/DataRecovery.App/Assets/datarecovery-logo.svg" width="112" alt="DataRecovery Logo" />
-  <img width="1202" height="672" alt="image" src="https://github.com/user-attachments/assets/dc64064e-40eb-488a-bcc8-663a99f29044" />
 
 </p>
 
