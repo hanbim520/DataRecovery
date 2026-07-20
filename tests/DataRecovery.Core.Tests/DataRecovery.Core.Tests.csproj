@@ -19,6 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\DataRecovery.App\DataRecovery.App.csproj" />
     <ProjectReference Include="..\..\src\DataRecovery.Core\DataRecovery.Core.csproj" />
   </ItemGroup>
 

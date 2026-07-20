@@ -115,6 +115,102 @@ public sealed class RecoveryScannerTests
         }
     }
 
+    [Fact]
+    public async Task RecoversUnalignedExtentAcrossInternalBufferBoundary()
+    {
+        var root = Path.Combine(Path.GetTempPath(), $"datarecovery-unaligned-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(root);
+        try
+        {
+            const int offset = 4090;
+            const int size = 1024 * 1024 + 137;
+            var image = Path.Combine(root, "unaligned.img");
+            var bytes = new byte[offset + size + 100];
+            for (var index = 0; index < size; index++)
+                bytes[offset + index] = (byte)(index * 31 + 7);
+            await File.WriteAllBytesAsync(image, bytes);
+            var file = new RecoveredFile(
+                "unaligned.bin", "格式化或丢失文件/其他", size, "其他",
+                RecoveryState.Good, offset, "测试区段");
+
+            var output = Path.Combine(root, "output");
+            await RecoveryScanner.RecoverAsync(image, file, output);
+
+            var recovered = await File.ReadAllBytesAsync(Path.Combine(output, "unaligned.bin"));
+            Assert.Equal(bytes.AsSpan(offset, size).ToArray(), recovered);
+        }
+        finally
+        {
+            Directory.Delete(root, true);
+        }
+    }
+
+    [Fact]
+    public async Task DeletesIncompleteOutputWhenSourceEndsEarly()
+    {
+        var root = Path.Combine(Path.GetTempPath(), $"datarecovery-short-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(root);
+        try
+        {
+            var image = Path.Combine(root, "short.img");
+            await File.WriteAllBytesAsync(image, new byte[128]);
+            var file = new RecoveredFile(
+                "incomplete.bin", "格式化或丢失文件/其他", 100, "其他",
+                RecoveryState.Good, 64, "测试区段");
+            var output = Path.Combine(root, "output");
+
+            await Assert.ThrowsAsync<EndOfStreamException>(
+                () => RecoveryScanner.RecoverAsync(image, file, output));
+
+            Assert.Empty(Directory.GetFiles(output));
+        }
+        finally
+        {
+            Directory.Delete(root, true);
+        }
+    }
+
+    [Fact]
+    public async Task KeepsStructurallyCompleteJpegAndRejectsHeaderFooterNoise()
+    {
+        var root = Path.Combine(Path.GetTempPath(), $"datarecovery-jpeg-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(root);
+        try
+        {
+            var image = Path.Combine(root, "jpeg.img");
+            var bytes = new byte[8192];
+            byte[] falsePositive = [0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10, 1, 2, 3, 0xFF, 0xD9];
+            falsePositive.CopyTo(bytes, 100);
+            var jpeg = CreateMinimalJpeg();
+            jpeg.CopyTo(bytes, 2048);
+            await File.WriteAllBytesAsync(image, bytes);
+
+            var scanner = new RecoveryScanner(new FileSystemDetector());
+            var result = await scanner.ScanAsync(image, ScanMode.LostFiles);
+
+            var file = Assert.Single(result.Files);
+            Assert.Equal(2048, file.Offset);
+            Assert.Equal(jpeg.Length, file.Size);
+            Assert.Equal("JPEG", file.Signature);
+        }
+        finally
+        {
+            Directory.Delete(root, true);
+        }
+    }
+
+    private static byte[] CreateMinimalJpeg() =>
+    [
+        0xFF, 0xD8,
+        0xFF, 0xE0, 0x00, 0x10,
+        (byte)'J', (byte)'F', (byte)'I', (byte)'F', 0x00, 0x01, 0x01,
+        0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00,
+        0xFF, 0xC0, 0x00, 0x0B, 0x08, 0x00, 0x01, 0x00, 0x01, 0x01, 0x01, 0x11, 0x00,
+        0xFF, 0xDA, 0x00, 0x08, 0x01, 0x01, 0x00, 0x00, 0x3F, 0x00,
+        0x01, 0x02, 0xFF, 0x00, 0x03, 0xFF, 0xD0, 0x04,
+        0xFF, 0xD9
+    ];
+
     private sealed class InlineProgress<T>(Action<T> callback) : IProgress<T>
     {
         public void Report(T value) => callback(value);

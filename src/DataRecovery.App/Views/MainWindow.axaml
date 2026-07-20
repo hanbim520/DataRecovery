@@ -28,10 +28,18 @@
           </Border>
           <StackPanel Spacing="0">
             <TextBlock Text="DataRecovery" Foreground="White" FontSize="20" FontWeight="SemiBold"/>
-            <TextBlock Text="专业、安全、只读的数据恢复工具" Foreground="#9FC8C3" FontSize="11"/>
+            <TextBlock Text="数据恢复与文件级安全删除工具" Foreground="#9FC8C3" FontSize="11"/>
           </StackPanel>
         </StackPanel>
         <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="10">
+          <Button Classes="topbarButton"
+                  Command="{Binding OpenShredPageCommand}"
+                  IsEnabled="{Binding CanConfigureScan}">
+            <StackPanel Orientation="Horizontal" Spacing="7">
+              <TextBlock Text="⨯" Foreground="#FFD8D4" FontSize="15" FontWeight="Bold"/>
+              <TextBlock Text="文件粉碎" Foreground="#FFD8D4" FontWeight="SemiBold"/>
+            </StackPanel>
+          </Button>
           <Button Classes="topbarButton"
                   IsEnabled="{Binding CanConfigureScan}"
                   >
@@ -53,8 +61,8 @@
                     </RadioButton>
                     <RadioButton GroupName="ScanMode" IsChecked="{Binding IsLostScanMode, Mode=TwoWay}">
                       <StackPanel Margin="6,0,0,0" Spacing="2">
-                        <TextBlock Text="丢失文件" FontWeight="SemiBold" Foreground="#26364A"/>
-                        <TextBlock Text="按文件特征查找原路径未知的候选数据" Foreground="#758398" FontSize="11"/>
+                        <TextBlock Text="格式化/丢失文件" FontWeight="SemiBold" Foreground="#26364A"/>
+                        <TextBlock Text="不依赖旧文件系统，按文件结构扫描残留数据" Foreground="#758398" FontSize="11"/>
                       </StackPanel>
                     </RadioButton>
                     <RadioButton GroupName="ScanMode" IsChecked="{Binding IsAllScanMode, Mode=TwoWay}">
@@ -72,8 +80,11 @@
               <TextBlock Text="设置" Foreground="#D8FAF5" FontWeight="SemiBold"/>
             </StackPanel>
           </Button>
-          <Border Background="#153936" BorderBrush="#2A5D58" BorderThickness="1" CornerRadius="16" Padding="13,6">
+          <Border IsVisible="{Binding !ShowShredPage}" Background="#153936" BorderBrush="#2A5D58" BorderThickness="1" CornerRadius="16" Padding="13,6">
             <TextBlock Text="●  只读扫描 · 安全恢复" Foreground="#99F6E4" FontSize="12"/>
+          </Border>
+          <Border IsVisible="{Binding ShowShredPage}" Background="#471B1B" BorderBrush="#7F3030" BorderThickness="1" CornerRadius="16" Padding="13,6">
+            <TextBlock Text="●  文件粉碎 · 会写入并删除" Foreground="#FECACA" FontSize="12"/>
           </Border>
         </StackPanel>
       </Grid>
@@ -82,7 +93,8 @@
     <Grid Grid.Row="1" ColumnDefinitions="240,*">
       <!-- 左侧步骤 -->
       <Border Background="#111827" BorderBrush="#263244" BorderThickness="0,0,1,0" Padding="24,30">
-        <Grid RowDefinitions="Auto,Auto,Auto,*,Auto">
+        <Grid>
+        <Grid IsVisible="{Binding !ShowShredPage}" RowDefinitions="Auto,Auto,Auto,*,Auto">
           <TextBlock Text="恢复流程" FontWeight="SemiBold" Foreground="#94A3B8" FontSize="13" Margin="4,0,0,22"/>
           <StackPanel Grid.Row="1" Spacing="0">
             <Grid ColumnDefinitions="38,*" Height="58">
@@ -120,6 +132,30 @@
               <TextBlock Text="请勿将恢复文件保存回源磁盘，以免覆盖尚未恢复的数据。" TextWrapping="Wrap" Foreground="#AAB6C5" FontSize="11" LineHeight="17"/>
             </StackPanel>
           </Border>
+        </Grid>
+
+        <Grid IsVisible="{Binding ShowShredPage}" RowDefinitions="Auto,Auto,*,Auto">
+          <TextBlock Text="安全工具" FontWeight="SemiBold" Foreground="#94A3B8"
+                     FontSize="13" Margin="4,0,0,22"/>
+          <StackPanel Grid.Row="1" Spacing="14">
+            <Border Width="48" Height="48" CornerRadius="24" Background="#7F1D1D"
+                    HorizontalAlignment="Left">
+              <TextBlock Text="⨯" Foreground="#FEE2E2" FontSize="25" FontWeight="Bold"
+                         HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Border>
+            <TextBlock Text="专业文件粉碎" Foreground="White" FontSize="17" FontWeight="SemiBold"/>
+            <TextBlock Text="覆盖文件内容并进行校验，随后随机化当前目录项名称、截断并删除。"
+                       Foreground="#9CAABD" FontSize="12" TextWrapping="Wrap" LineHeight="19"/>
+          </StackPanel>
+          <Border Grid.Row="3" Background="#2A1C22" BorderBrush="#68404A" BorderThickness="1"
+                  CornerRadius="10" Padding="14">
+            <StackPanel Spacing="7">
+              <TextBlock Text="不可撤销" Foreground="#FDA4AF" FontWeight="SemiBold" FontSize="12"/>
+              <TextBlock Text="粉碎开始后无法暂停或恢复。取消时，正在处理的文件也可能已经损坏。"
+                         TextWrapping="Wrap" Foreground="#C6ADB3" FontSize="11" LineHeight="17"/>
+            </StackPanel>
+          </Border>
+        </Grid>
         </Grid>
       </Border>
 
@@ -294,13 +330,133 @@
             </StackPanel>
           </Border>
         </Grid>
+
+        <!-- 文件粉碎 -->
+        <Grid IsVisible="{Binding ShowShredPage}" RowDefinitions="Auto,Auto,*,Auto">
+          <Grid ColumnDefinitions="Auto,*,Auto" VerticalAlignment="Center">
+            <Button Classes="secondary" Content="←  返回恢复工具"
+                    Command="{Binding CloseShredPageCommand}"
+                    IsEnabled="{Binding CanEditShredFiles}" Margin="0,0,18,0"/>
+            <StackPanel Grid.Column="1" Spacing="3">
+              <TextBlock Text="文件级安全删除" Classes="heading"/>
+              <TextBlock Text="覆盖内容、校验最终写入、随机化当前目录项名称并删除"
+                         Classes="muted"/>
+            </StackPanel>
+            <Button Grid.Column="2" Classes="secondary" Content="＋  选择文件"
+                    Command="{Binding ChooseShredFilesCommand}"
+                    IsEnabled="{Binding CanEditShredFiles}"/>
+          </Grid>
+
+          <Border Grid.Row="1" Margin="0,18,0,14" Background="#FFF7ED"
+                  BorderBrush="#FED7AA" BorderThickness="1" CornerRadius="11" Padding="16,12">
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+              <TextBlock Text="⚠" Foreground="#C2410C" FontSize="18" FontWeight="Bold"/>
+              <StackPanel Grid.Column="1" Spacing="3">
+                <TextBlock Text="该操作会写入并删除文件，不可撤销" Foreground="#9A3412"
+                           FontWeight="SemiBold"/>
+                <TextBlock Foreground="#9A5A3A" FontSize="11" TextWrapping="Wrap"
+                           Text="仅传统机械硬盘上的普通文件适合文件级覆盖。SSD、U盘、存储卡、写时复制文件系统、快照、云端版本和备份中的副本无法保证被清除。"/>
+              </StackPanel>
+            </Grid>
+          </Border>
+
+          <Grid Grid.Row="2" ColumnDefinitions="3*,2*" ColumnSpacing="16" MinHeight="250">
+            <Border Classes="card" Padding="0" ClipToBounds="True">
+              <Grid RowDefinitions="48,*">
+                <Grid ColumnDefinitions="*,Auto,Auto" Margin="16,0" VerticalAlignment="Center">
+                  <TextBlock Text="{Binding ShredFileCountText}" Foreground="#26364A"
+                             FontWeight="SemiBold"/>
+                  <Button Grid.Column="1" Classes="secondary" Content="移除选中"
+                          Command="{Binding RemoveSelectedShredFileCommand}"
+                          IsEnabled="{Binding CanRemoveShredFile}" Padding="12,7" Margin="0,0,8,0"/>
+                  <Button Grid.Column="2" Classes="secondary" Content="清空"
+                          Command="{Binding ClearShredFilesCommand}"
+                          IsEnabled="{Binding CanEditShredFiles}" Padding="12,7"/>
+                </Grid>
+                <ListBox Grid.Row="1" ItemsSource="{Binding ShredFiles}"
+                         SelectedItem="{Binding SelectedShredFile}"
+                         Background="Transparent" BorderThickness="0">
+                  <ListBox.ItemTemplate>
+                    <DataTemplate x:DataType="vm:ShredFileItemViewModel">
+                      <Grid ColumnDefinitions="*,90,150" MinHeight="62" Margin="9,2">
+                        <StackPanel VerticalAlignment="Center" Spacing="3">
+                          <TextBlock Text="{Binding Name}" Foreground="#23344A"
+                                     FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                          <TextBlock Text="{Binding FullPath}" Foreground="#7B8798" FontSize="10"
+                                     TextTrimming="CharacterEllipsis"/>
+                        </StackPanel>
+                        <TextBlock Grid.Column="1" Text="{Binding SizeText}"
+                                   VerticalAlignment="Center" Foreground="#52667E"/>
+                        <TextBlock Grid.Column="2" Text="{Binding Status}"
+                                   VerticalAlignment="Center" Foreground="#9A3412"
+                                   TextWrapping="Wrap" FontSize="11"/>
+                      </Grid>
+                    </DataTemplate>
+                  </ListBox.ItemTemplate>
+                </ListBox>
+              </Grid>
+            </Border>
+
+            <Border Grid.Column="1" Classes="card" Padding="14"
+                    IsEnabled="{Binding CanEditShredFiles}">
+                <StackPanel Spacing="6">
+                  <TextBlock Text="覆盖模式" Foreground="#26364A" FontWeight="SemiBold"/>
+                  <RadioButton GroupName="ShredMode" IsChecked="{Binding IsOnePassShredMode, Mode=TwoWay}">
+                    <TextBlock Text="单次随机覆盖（默认）" Margin="6,0,0,0" FontWeight="SemiBold"/>
+                  </RadioButton>
+                  <RadioButton GroupName="ShredMode" IsChecked="{Binding IsThreePassShredMode, Mode=TwoWay}">
+                    <TextBlock Text="3 次覆盖" Margin="6,0,0,0" FontWeight="SemiBold"/>
+                  </RadioButton>
+                  <RadioButton GroupName="ShredMode" IsChecked="{Binding IsSevenPassShredMode, Mode=TwoWay}">
+                    <TextBlock Text="7 次覆盖（耗时很长）" Margin="6,0,0,0" FontWeight="SemiBold"/>
+                  </RadioButton>
+                  <TextBlock Text="{Binding ShredModeDescription}" Foreground="#758398"
+                             FontSize="9" TextWrapping="Wrap"/>
+                  <Border Height="1" Background="#E5EBF2" Margin="0,2"/>
+                  <TextBlock Text="阅读说明" Foreground="#26364A" FontWeight="SemiBold"/>
+                  <Border Background="#F5F8FC" BorderBrush="#DCE5F0" BorderThickness="1"
+                          CornerRadius="8" Padding="10,8">
+                    <TextBlock FontSize="9" Foreground="#5E6E82" TextWrapping="Wrap"
+                               LineHeight="16"
+                               Text="• 粉碎会覆盖内容并删除文件，操作无法撤销。&#10;• 请确认所选文件及完整路径无误。&#10;• SSD、U盘等闪存介质无法保证物理副本完全清除。"/>
+                  </Border>
+                  <CheckBox IsChecked="{Binding ShredConfirmation, Mode=TwoWay}">
+                    <TextBlock Text="我已阅读并同意以上说明"
+                               TextWrapping="Wrap" FontSize="10" FontWeight="SemiBold"/>
+                  </CheckBox>
+                </StackPanel>
+            </Border>
+          </Grid>
+
+          <Grid Grid.Row="3" ColumnDefinitions="*,Auto" Margin="0,14,0,0">
+            <StackPanel Spacing="6" VerticalAlignment="Center" MaxWidth="620"
+                        HorizontalAlignment="Left">
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Text="{Binding ShredStatusText}" Foreground="#5C6675"
+                           TextTrimming="CharacterEllipsis"/>
+                <TextBlock Grid.Column="1" Text="{Binding ShredProgressText}"
+                           Foreground="#B42318" FontWeight="SemiBold" Margin="12,0,0,0"/>
+              </Grid>
+              <ProgressBar Value="{Binding ShredProgress}" Maximum="100" Height="7"/>
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
+              <Button Classes="secondary" Content="取消"
+                      Command="{Binding CancelShredCommand}" IsVisible="{Binding IsBusy}"/>
+              <Button Classes="danger" Content="开始粉碎"
+                      Command="{Binding StartShredCommand}" IsEnabled="{Binding CanStartShred}"/>
+            </StackPanel>
+          </Grid>
+        </Grid>
       </Grid>
     </Grid>
 
     <Border Grid.Row="2" Background="#EFF3F8" BorderBrush="#DCE4EE" BorderThickness="0,1,0,0" Padding="26,0">
       <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center">
         <TextBlock Text="{Binding StatusText}" Foreground="#607188" FontSize="12"/>
-        <TextBlock Grid.Column="1" Text="DataRecovery 1.0 · 跨平台只读恢复引擎" Foreground="#8896A8" FontSize="11"/>
+        <TextBlock Grid.Column="1" IsVisible="{Binding !ShowShredPage}"
+                   Text="DataRecovery 1.0 · 跨平台只读恢复引擎" Foreground="#8896A8" FontSize="11"/>
+        <TextBlock Grid.Column="1" IsVisible="{Binding ShowShredPage}"
+                   Text="恢复扫描只读 · 文件粉碎会写入并删除" Foreground="#A56868" FontSize="11"/>
       </Grid>
     </Border>
   </Grid>

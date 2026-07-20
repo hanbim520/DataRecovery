@@ -1,3 +1,4 @@
+using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;
 using DataRecovery.App.ViewModels;
@@ -37,6 +38,20 @@ public partial class MainWindow : Window
                 AllowMultiple = false
             });
             return folders.Count > 0 ? folders[0].TryGetLocalPath() : null;
+        };
+        vm.SelectShredFilesRequested = async () =>
+        {
+            var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+            {
+                Title = "选择需要永久粉碎的文件",
+                AllowMultiple = true,
+                FileTypeFilter = [FilePickerFileTypes.All]
+            });
+            return files
+                .Select(file => file.TryGetLocalPath())
+                .Where(path => !string.IsNullOrWhiteSpace(path))
+                .Cast<string>()
+                .ToArray();
         };
     }
 }

@@ -62,6 +62,26 @@
       <Setter Property="Background" Value="#DDF8F3"/>
       <Setter Property="Foreground" Value="#153C42"/>
     </Style>
+    <Style Selector="Button.danger">
+      <Setter Property="Background" Value="#B42318"/>
+      <Setter Property="Foreground" Value="White"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="CornerRadius" Value="9"/>
+      <Setter Property="Padding" Value="24,12"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+    </Style>
+    <Style Selector="Button.danger:pointerover">
+      <Setter Property="Background" Value="#912018"/>
+      <Setter Property="Foreground" Value="White"/>
+    </Style>
+    <Style Selector="Button.danger:pressed">
+      <Setter Property="Background" Value="#761B15"/>
+      <Setter Property="Foreground" Value="White"/>
+    </Style>
+    <Style Selector="Button.danger:disabled">
+      <Setter Property="Background" Value="#D8C2C0"/>
+      <Setter Property="Foreground" Value="#FFF8F7"/>
+    </Style>
     <Style Selector="Button.topbarButton">
       <Setter Property="Background" Value="#173D3A"/>
       <Setter Property="Foreground" Value="#D8FAF5"/>
